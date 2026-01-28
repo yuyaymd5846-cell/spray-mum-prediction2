@@ -1,0 +1,6 @@
+pandas
+streamlit
+st-gsheets-connection
+python-dateutil
+pytest
+altair
