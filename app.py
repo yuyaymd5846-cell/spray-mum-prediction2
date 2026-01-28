@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.2)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.3)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -550,6 +550,22 @@ else:
             }
             # Rename columns if they match keys
             input_df = input_df.rename(columns=jp_map)
+            
+            # --- COLOR MAPPING TRANSFORMATION ---
+            color_code_map = {
+                'w': '白', 'W': '白', 'ｗ': '白', 'Ｗ': '白',
+                'y': '黄', 'Y': '黄', 'ｙ': '黄', 'Ｙ': '黄',
+                'p': 'ピンク', 'P': 'ピンク', 'ｐ': 'ピンク', 'Ｐ': 'ピンク',
+                'r': '赤', 'R': '赤', 'ｒ': '赤', 'Ｒ': '赤',
+                'o': 'オレンジ', 'O': 'オレンジ', 'ｏ': 'オレンジ', 'Ｏ': 'オレンジ',
+                'g': '緑', 'G': '緑', 'ｇ': '緑', 'Ｇ': '緑'
+            }
+            if 'color' in input_df.columns:
+                def normalize_color(val):
+                    if pd.isna(val): return val
+                    s = str(val).strip()
+                    return color_code_map.get(s, color_code_map.get(s.lower(), s))
+                input_df['color'] = input_df['color'].apply(normalize_color)
             
 
             
