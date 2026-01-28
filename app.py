@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.1)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
