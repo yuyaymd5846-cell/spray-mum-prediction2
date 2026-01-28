@@ -218,6 +218,17 @@ with st.sidebar.expander("一括編集 (データ修正)", expanded=False):
     # Filters
     master_df = st.session_state['master_df']
     if not master_df.empty:
+        # SELF-HEALING: Check for corruption (missing columns)
+        required_cols_check = {'house_name', 'variety', 'blackout_date'}
+        if not required_cols_check.issubset(master_df.columns):
+            st.error("【重要】データが破損しているためリセットします。")
+            st.session_state['master_df'] = pd.DataFrame(columns=[
+                "producer", "house_name", "variety", "area_tsubo", 
+                "blackout_date", "coeff", "weeks", "color", "shape"
+            ])
+            master_df = st.session_state['master_df']
+            st.rerun()
+
         if 'producer' not in master_df.columns:
             master_df['producer'] = ""
             
