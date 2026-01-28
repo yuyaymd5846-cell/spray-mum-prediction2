@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.4)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.5)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -695,6 +695,22 @@ if input_df is not None and not input_df.empty:
         if view_df.empty:
             st.warning(f"指定された期間 ({view_start_date} ~ {view_end_date}) のデータはありません。")
         else:
+            # Custom Sort Order for Colors
+            color_order = ["白", "ホワイト", "黄", "イエロー", "ピンク", "赤", "レッド", "オレンジ", "茶", "紫", "パープル", "緑", "グリーン", "複色"]
+            # Filter only colors that actually exist in the data to avoid issues (optional but safer)
+            # Actually pandas Categorical handles unused categories fine, they just sort last or first.
+            # We enforce the specific order requested: White, Yellow, Pink, Red, Orange, Green, Mixed
+            # Note: We include variations just in case, but strictly the user requested specific ones.
+            strict_order = ["白", "黄", "ピンク", "赤", "オレンジ", "緑", "複色"]
+            
+            # Ensure 'color' column respects this order
+            if 'color' in view_df.columns:
+                view_df['color'] = pd.Categorical(
+                    view_df['color'], 
+                    categories=strict_order, 
+                    ordered=True
+                )
+
             st.divider()
             st.subheader(f"週間集計 ({view_start_date} ~ {view_end_date})")
 
