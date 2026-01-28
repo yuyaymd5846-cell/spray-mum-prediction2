@@ -519,6 +519,10 @@ else:
                 st.write("詳細エラー:", error_msgs)
                 input_df = None
             
+            # DEBUG: Show detected columns
+            if input_df is not None:
+                 st.write(f"DEBUG: Loaded Columns: {list(input_df.columns)}")
+            
             # Support for Japanese Headers (e.g. from Google Forms)
             
             # Support for Japanese Headers (e.g. from Google Forms)
