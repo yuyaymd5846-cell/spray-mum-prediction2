@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.3)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.4)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -723,8 +723,8 @@ if input_df is not None and not input_df.empty:
                 
                 # Color Mapping
                 # We map Japanese color names to Hex
-                domain_colors = ['白', 'ホワイト', '黄', 'イエロー', 'ピンク', '赤', 'レッド', 'オレンジ', '茶', '紫', 'パープル', '緑', 'グリーン']
-                range_colors =  ['#e0e0e0', '#e0e0e0', '#fff176', '#fff176', '#f48fb1', '#e57373', '#e57373', '#ffb74d', '#8d6e63', '#ba68c8', '#ba68c8', '#81c784', '#81c784']
+                domain_colors = ['白', 'ホワイト', '黄', 'イエロー', 'ピンク', '赤', 'レッド', 'オレンジ', '茶', '紫', 'パープル', '緑', 'グリーン', '複色']
+                range_colors =  ['#e0e0e0', '#e0e0e0', '#fff176', '#fff176', '#f48fb1', '#e57373', '#e57373', '#ffb74d', '#8d6e63', '#ba68c8', '#ba68c8', '#81c784', '#81c784', '#a1887f']
                 
                 import altair as alt
                 
