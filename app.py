@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.1)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.2)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -463,7 +463,7 @@ else:
 
     st.info("CSV列順序 (ヘッダーなし/あり共通): house_name, variety, area_tsubo, blackout_date, coeff, weeks, color, shape")
     if uploaded_file:
-        try:
+
             # DEBUG INFO
             st.write(f"DEBUG: Filename is '{uploaded_file.name}'")
             if st.button("キャッシュをクリア"):
@@ -536,51 +536,7 @@ else:
             # Rename columns if they match keys
             input_df = input_df.rename(columns=jp_map)
             
-            # Check if essential columns are present
-            required_cols = {'house_name', 'variety', 'area_tsubo', 'blackout_date'}
-            current_cols = set(input_df.columns)
-            
-            # If missing essential columns, try reading as headerless
-            if not required_cols.issubset(current_cols):
-                # Reset file pointer
-                uploaded_file.seek(0)
-                # Read without header
-                input_df = pd.read_csv(uploaded_file, header=None)
-                
-                # Heuristic to detect column order
-                # Schema A (Standard/Legacy): house_name(0), variety(1), area_tsubo(2), blackout_date(3), ...
-                # Schema B (Grouped): house_name(0), variety(1), color(2), shape(3), area_tsubo(4), blackout_date(5), ...
-                # New Schema C (With Producer): producer(0), house_name(1), ...? Or just append.
-                # Let's assume standard A/B for headerless. If producer is needed, use header.
-                
-                def is_numeric_col(col_idx):
-                    if col_idx >= input_df.shape[1]: return False
-                    try:
-                        pd.to_numeric(input_df.iloc[:, col_idx], errors='raise')
-                        return True
-                    except:
-                        return False
 
-                # Check Column 2
-                if is_numeric_col(2):
-                    # Likely Schema A
-                    col_names = ["house_name", "variety", "area_tsubo", "blackout_date", "coeff", "weeks", "color", "shape"]
-                elif is_numeric_col(4):
-                    # Likely Schema B
-                    col_names = ["house_name", "variety", "color", "shape", "area_tsubo", "blackout_date", "coeff", "weeks"]
-                else:
-                    # Fallback to Schema A
-                        col_names = ["house_name", "variety", "area_tsubo", "blackout_date", "coeff", "weeks", "color", "shape"]
-
-                num_cols = input_df.shape[1]
-                if num_cols > len(col_names):
-                    input_df.columns = col_names + [f"col_{i}" for i in range(len(col_names), num_cols)]
-                else:
-                    input_df.columns = col_names[:num_cols]
-
-        except Exception as e:
-            st.error(f"CSV読み込みエラー: {e}")
-            input_df = None
             
 
     if input_df is not None and not input_df.empty:
