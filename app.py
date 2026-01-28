@@ -460,7 +460,7 @@ elif input_method == "Googleスプレッドシート":
 
     except Exception as e:
         st.error(f"Googleスプレッドシート接続エラー: {e}")
-        st.help("secrets.toml の設定や、シートの共有設定を確認してください。")
+        st.info("secrets.toml の設定や、シートの共有設定を確認してください。")
         input_df = None
 
 else:
