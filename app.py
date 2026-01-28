@@ -458,18 +458,23 @@ elif input_method == "Googleスプレッドシート":
         input_df = None
 
 else:
-    uploaded_file = st.file_uploader("CSVファイルをアップロード", type=["csv"])
+    uploaded_file = st.file_uploader("ファイル (CSV/Excel) をアップロード", type=["csv", "xlsx"])
 
     st.info("CSV列順序 (ヘッダーなし/あり共通): house_name, variety, area_tsubo, blackout_date, coeff, weeks, color, shape")
     if uploaded_file:
-        # Try reading with default behavior (header=0)
         try:
-            try:
-                input_df = pd.read_csv(uploaded_file, encoding='utf-8')
-            except UnicodeDecodeError:
-                # Fallback to Shift-JIS (CP932) for Japanese Excel CSVs
-                uploaded_file.seek(0)
-                input_df = pd.read_csv(uploaded_file, encoding='cp932')
+            # Determine file type and read accordingly
+            if uploaded_file.name.endswith('.xlsx'):
+                input_df = pd.read_excel(uploaded_file)
+            else:
+                # CSV logic (with fallback)
+                try:
+                    input_df = pd.read_csv(uploaded_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    uploaded_file.seek(0)
+                    input_df = pd.read_csv(uploaded_file, encoding='cp932')
+            
+            # Support for Japanese Headers (e.g. from Google Forms)
             
             # Support for Japanese Headers (e.g. from Google Forms)
             jp_map = {
