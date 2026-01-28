@@ -464,7 +464,7 @@ else:
     if uploaded_file:
         try:
             # Determine file type and read accordingly
-            if uploaded_file.name.endswith('.xlsx'):
+            if uploaded_file.name.lower().endswith('.xlsx'):
                 try:
                     input_df = pd.read_excel(uploaded_file)
                 except Exception as e:
