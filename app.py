@@ -465,7 +465,10 @@ else:
     if uploaded_file:
         try:
             # DEBUG INFO
-            st.write(f"Filename Code sees: {uploaded_file.name}")
+            st.write(f"DEBUG: Filename is '{uploaded_file.name}'")
+            if st.button("キャッシュをクリア"):
+                st.cache_data.clear()
+                st.rerun()
             
             # Try reading as Excel first (regardless of extension)
             # This handles cases where extension check fails or file is misnamed
