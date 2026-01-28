@@ -464,7 +464,12 @@ else:
     if uploaded_file:
         # Try reading with default behavior (header=0)
         try:
-            input_df = pd.read_csv(uploaded_file)
+            try:
+                input_df = pd.read_csv(uploaded_file, encoding='utf-8')
+            except UnicodeDecodeError:
+                # Fallback to Shift-JIS (CP932) for Japanese Excel CSVs
+                uploaded_file.seek(0)
+                input_df = pd.read_csv(uploaded_file, encoding='cp932')
             
             # Support for Japanese Headers (e.g. from Google Forms)
             jp_map = {
