@@ -413,49 +413,43 @@ elif input_method == "Googleスプレッドシート":
                 "ローカル保存データに統合 (Merge)", 
                 key="merge_gs_to_local",
                 on_click=merge_and_switch_callback,
-                args=(input_df,)
             )
             
-            st.divider()
-            st.caption("※「変更を保存」を実行するには、まずローカルデータをスプレッドシート形式で書き込む必要があります。")
-            if st.button("現在の全データをスプレッドシートに上書き保存", key="save_local_to_gs"):
-                try:
-                    # Reverse Map? Or just use English keys?
-                    # Ideally we use the same headers as the sheet expects.
-                    # Let's check the input_df columns (reversed mapping) or just write what we have.
-                    # If we write English keys, the sheet headers will change to English.
-                    # It's safer to map back to Japanese if the user is Japanese.
-                    
-                    # Define Export Map
-                    export_map = {
-                        "producer": "生産者",
-                        "house_name": "ハウス名",
-                        "variety": "品種",
-                        "area_tsubo": "面積",
-                        "blackout_date": "消灯日",
-                        "coeff": "係数",
-                        "weeks": "週数",
-                        "color": "花色",
-                        "shape": "花形"
-                    }
-                    
-                    # Prepare Data
-                    save_df = st.session_state['master_df'].copy()
-                    
-                    # Ensure Date format
-                    if 'blackout_date' in save_df.columns:
-                        save_df['blackout_date'] = pd.to_datetime(save_df['blackout_date']).dt.strftime('%Y-%m-%d')
-                    
-                    # Rename
-                    save_df = save_df.rename(columns=export_map)
-                    
-                    # Write to Sheet (worksheet='シート1' default, or first sheet)
-                    # conn.update() replaces the content.
-                    conn.update(data=save_df)
-                    st.success("スプレッドシートに保存しました！")
-                    
-                except Exception as e:
-                    st.error(f"保存エラー: {e}")
+        # Always allow saving to initialize an empty sheet
+        st.divider()
+        st.caption("※以下のボタンを押すと、現在アプリに表示されているデータをスプレッドシートに書き込みます（初期化にも使えます）。")
+        if st.button("現在の全データをスプレッドシートに上書き保存", key="save_local_to_gs"):
+            try:
+                # Define Export Map
+                export_map = {
+                    "producer": "生産者",
+                    "house_name": "ハウス名",
+                    "variety": "品種",
+                    "area_tsubo": "面積",
+                    "blackout_date": "消灯日",
+                    "coeff": "係数",
+                    "weeks": "週数",
+                    "color": "花色",
+                    "shape": "花形"
+                }
+                
+                # Prepare Data
+                save_df = st.session_state['master_df'].copy()
+                
+                # Ensure Date format
+                if 'blackout_date' in save_df.columns:
+                    save_df['blackout_date'] = pd.to_datetime(save_df['blackout_date']).dt.strftime('%Y-%m-%d')
+                
+                # Rename
+                save_df = save_df.rename(columns=export_map)
+                
+                # Write to Sheet
+                conn.update(data=save_df)
+                st.success("スプレッドシートに保存しました！")
+                
+            except Exception as e:
+                st.error(f"保存エラー: {e}")
+
 
 
     except Exception as e:
