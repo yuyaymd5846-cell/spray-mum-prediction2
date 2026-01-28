@@ -465,7 +465,7 @@ else:
     if uploaded_file:
         try:
             # DEBUG INFO
-            # st.write(f"Filename: {uploaded_file.name}")
+            st.write(f"Filename Code sees: {uploaded_file.name}")
             
             # Determine file type and read accordingly
             if uploaded_file.name.lower().endswith('.xlsx'):
