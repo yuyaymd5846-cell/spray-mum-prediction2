@@ -467,40 +467,54 @@ else:
             # DEBUG INFO
             st.write(f"Filename Code sees: {uploaded_file.name}")
             
-            # Determine file type and read accordingly
-            if uploaded_file.name.lower().endswith('.xlsx'):
+            # Try reading as Excel first (regardless of extension)
+            # This handles cases where extension check fails or file is misnamed
+            read_success = False
+            error_msgs = []
+            
+            try:
+                # EXCEL ATTEMPT
+                uploaded_file.seek(0)
+                # Determine header row dynamically
+                temp_df = pd.read_excel(uploaded_file, header=None, nrows=10)
+                header_row_idx = 0
+                
+                for i, row in temp_df.iterrows():
+                    row_text = " ".join([str(x) for x in row.values])
+                    if "品種" in row_text and ("ハウス" in row_text or "生産者" in row_text):
+                        header_row_idx = i
+                        break
+                
+                uploaded_file.seek(0)
+                input_df = pd.read_excel(uploaded_file, header=header_row_idx)
+                read_success = True
+                
+            except Exception as e_excel:
+                # If Excel fails, store error and try CSV
+                # error_msgs.append(f"Excel failed: {e_excel}")
+                pass
+
+            if not read_success:
                 try:
-                    # Determine header row dynamically
-                    # Read first few rows without header
-                    temp_df = pd.read_excel(uploaded_file, header=None, nrows=10)
-                    header_row_idx = 0
-                    
-                    found_header = False
-                    for i, row in temp_df.iterrows():
-                        # Check if row contains key keywords
-                        row_text = " ".join([str(x) for x in row.values])
-                        if "品種" in row_text and ("ハウス" in row_text or "生産者" in row_text):
-                            header_row_idx = i
-                            found_header = True
-                            break
-                    
-                    # Read with correct header
+                    # CSV ATTEMPT (UTF-8)
                     uploaded_file.seek(0)
-                    input_df = pd.read_excel(uploaded_file, header=header_row_idx)
-                    
-                except Exception as e:
-                    st.error(f"Excel読み込みエラー: {e}")
-                    input_df = None
-            else:
-                # CSV logic (with fallback)
-                try:
                     input_df = pd.read_csv(uploaded_file, encoding='utf-8')
+                    read_success = True
                 except UnicodeDecodeError:
-                    uploaded_file.seek(0)
-                    input_df = pd.read_csv(uploaded_file, encoding='cp932')
-                except Exception as e:
-                     st.error(f"CSV読み込みエラー: {e}")
-                     input_df = None
+                    # CSV ATTEMPT (Shift-JIS)
+                    try:
+                        uploaded_file.seek(0)
+                        input_df = pd.read_csv(uploaded_file, encoding='cp932')
+                        read_success = True
+                    except Exception as e_csv_sj:
+                         error_msgs.append(f"CSV(SJIS) failed: {e_csv_sj}")
+                except Exception as e_csv:
+                     error_msgs.append(f"CSV(UTF8) failed: {e_csv}")
+
+            if not read_success:
+                st.error("ファイルを読み込めませんでした。")
+                st.write("詳細エラー:", error_msgs)
+                input_df = None
             
             # Support for Japanese Headers (e.g. from Google Forms)
             
