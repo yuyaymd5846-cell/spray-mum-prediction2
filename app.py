@@ -458,11 +458,15 @@ elif input_method == "Googleスプレッドシート":
         input_df = None
 
 else:
+    st.subheader("ファイルアップロード")
     uploaded_file = st.file_uploader("ファイル (CSV/Excel) をアップロード", type=["csv", "xlsx"])
 
     st.info("CSV列順序 (ヘッダーなし/あり共通): house_name, variety, area_tsubo, blackout_date, coeff, weeks, color, shape")
     if uploaded_file:
         try:
+            # DEBUG INFO
+            # st.write(f"Filename: {uploaded_file.name}")
+            
             # Determine file type and read accordingly
             if uploaded_file.name.lower().endswith('.xlsx'):
                 try:
