@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.5)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.6)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -695,21 +695,7 @@ if input_df is not None and not input_df.empty:
         if view_df.empty:
             st.warning(f"指定された期間 ({view_start_date} ~ {view_end_date}) のデータはありません。")
         else:
-            # Custom Sort Order for Colors
-            color_order = ["白", "ホワイト", "黄", "イエロー", "ピンク", "赤", "レッド", "オレンジ", "茶", "紫", "パープル", "緑", "グリーン", "複色"]
-            # Filter only colors that actually exist in the data to avoid issues (optional but safer)
-            # Actually pandas Categorical handles unused categories fine, they just sort last or first.
-            # We enforce the specific order requested: White, Yellow, Pink, Red, Orange, Green, Mixed
-            # Note: We include variations just in case, but strictly the user requested specific ones.
-            strict_order = ["白", "黄", "ピンク", "赤", "オレンジ", "緑", "複色"]
-            
-            # Ensure 'color' column respects this order
-            if 'color' in view_df.columns:
-                view_df['color'] = pd.Categorical(
-                    view_df['color'], 
-                    categories=strict_order, 
-                    ordered=True
-                )
+            st.divider()
 
             st.divider()
             st.subheader(f"週間集計 ({view_start_date} ~ {view_end_date})")
@@ -731,7 +717,38 @@ if input_df is not None and not input_df.empty:
                     fill_value=0
                 )
                 
-                # --- Visualization (Altair) ---
+                # --- Custom Column Sorting ---
+                # Sort columns based on Color order if 'color' is one of the keys
+                # This avoids the "Carteisan Product" explosion caused by Categorical type,
+                # while still enforcing the user's preferred order.
+                strict_order = ["白", "黄", "ピンク", "赤", "オレンジ", "緑", "複色"]
+                color_rank = {c: i for i, c in enumerate(strict_order)}
+                
+                if 'color' in selected_aggs and not pivot_df.empty:
+                    try:
+                        # Identify which level of the columns MultiIndex corresponds to 'color'
+                        # pivot_df.columns names are the list of agg keys in order
+                        # e.g. names=['color', 'shape', 'variety']
+                        col_names = pivot_df.columns.names
+                        if 'color' in col_names:
+                            color_idx = col_names.index('color')
+                            
+                            # Create a sorting key function
+                            def get_sort_key(col_tuple):
+                                # col_tuple is a tuple of values for one column
+                                c_val = col_tuple[color_idx] if isinstance(col_tuple, tuple) else col_tuple
+                                # Return: (Rank of Color, The Tuple itself)
+                                # Primary sort by Rank, Secondary sort by normal alphabetical
+                                return (color_rank.get(c_val, 999), col_tuple)
+                            
+                            # Sort the columns
+                            sorted_cols = sorted(pivot_df.columns, key=get_sort_key)
+                            pivot_df = pivot_df[sorted_cols]
+                    except Exception as e:
+                        # Fallback if sorting fails (should't happen but safe)
+                        st.write(f"DEBUG: Sort failed {e}")
+                
+                 # --- Visualization (Altair) ---
                 st.subheader("出荷予測グラフ (色・花形別)")
                 
                 # Chart always groups by Color and Shape for consistent visual "density" and coloring
