@@ -8,7 +8,7 @@ from src.calc import predict_single_house, aggregate_shipments, adjust_to_shippi
 # --- Page Config ---
 st.set_page_config(page_title="スプレーマム出荷予測", layout="wide")
 
-st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.6)")
+st.title("🌱 スプレーマム出荷予測アプリ (Ver 3.7)")
 
 # --- Sidebar: Common Settings ---
 st.sidebar.header("共通設定")
@@ -553,17 +553,19 @@ else:
             
             # --- COLOR MAPPING TRANSFORMATION ---
             color_code_map = {
-                'w': '白', 'W': '白', 'ｗ': '白', 'Ｗ': '白',
-                'y': '黄', 'Y': '黄', 'ｙ': '黄', 'Ｙ': '黄',
+                'w': '白', 'W': '白', 'ｗ': '白', 'Ｗ': '白', 'ホワイト': '白',
+                'y': '黄', 'Y': '黄', 'ｙ': '黄', 'Ｙ': '黄', 'イエロー': '黄',
                 'p': 'ピンク', 'P': 'ピンク', 'ｐ': 'ピンク', 'Ｐ': 'ピンク',
-                'r': '赤', 'R': '赤', 'ｒ': '赤', 'Ｒ': '赤',
+                'r': '赤', 'R': '赤', 'ｒ': '赤', 'Ｒ': '赤', 'レッド': '赤',
                 'o': 'オレンジ', 'O': 'オレンジ', 'ｏ': 'オレンジ', 'Ｏ': 'オレンジ',
-                'g': '緑', 'G': '緑', 'ｇ': '緑', 'Ｇ': '緑'
+                'g': '緑', 'G': '緑', 'ｇ': '緑', 'Ｇ': '緑', 'グリーン': '緑',
+                '紫': '紫', 'パープル': '紫'
             }
             if 'color' in input_df.columns:
                 def normalize_color(val):
                     if pd.isna(val): return val
                     s = str(val).strip()
+                    # Try direct map, then lowercase map, then check if it's already a valid Kanji
                     return color_code_map.get(s, color_code_map.get(s.lower(), s))
                 input_df['color'] = input_df['color'].apply(normalize_color)
             
@@ -756,8 +758,10 @@ if input_df is not None and not input_df.empty:
                 
                 # Color Mapping
                 # We map Japanese color names to Hex
-                domain_colors = ['白', 'ホワイト', '黄', 'イエロー', 'ピンク', '赤', 'レッド', 'オレンジ', '茶', '紫', 'パープル', '緑', 'グリーン', '複色']
-                range_colors =  ['#e0e0e0', '#e0e0e0', '#fff176', '#fff176', '#f48fb1', '#e57373', '#e57373', '#ffb74d', '#8d6e63', '#ba68c8', '#ba68c8', '#81c784', '#81c784', '#a1887f']
+                # Color Mapping
+                # We map Japanese color names to Hex
+                domain_colors = ['白', '黄', 'ピンク', '赤', 'オレンジ', '茶', '紫', '緑', '複色']
+                range_colors =  ['#e0e0e0', '#fff176', '#f48fb1', '#e57373', '#ffb74d', '#8d6e63', '#ba68c8', '#81c784', '#a1887f']
                 
                 import altair as alt
                 
