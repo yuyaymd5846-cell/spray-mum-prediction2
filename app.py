@@ -539,13 +539,13 @@ else:
             # Support for Japanese Headers (e.g. from Google Forms)
             jp_map = {
                 "生産者": "producer", "producer": "producer",
-                "ハウス名": "house_name",
+                "ハウス名": "house_name", "圃場名": "house_name",
                 "品種名": "variety", "品種": "variety",
-                "面積": "area_tsubo", "面積(坪)": "area_tsubo", "面積（坪）": "area_tsubo",
+                "面積": "area_tsubo", "面積(坪)": "area_tsubo", "面積（坪）": "area_tsubo", "面積 (坪)": "area_tsubo",
                 "消灯日": "blackout_date",
                 "係数": "coeff",
                 "週数": "weeks", "開花所要週数": "weeks",
-                "花色": "color",
+                "花色": "color", "色": "color",
                 "花形": "shape"
             }
             # Rename columns if they match keys
