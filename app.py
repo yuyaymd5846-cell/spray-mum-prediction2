@@ -465,7 +465,11 @@ else:
         try:
             # Determine file type and read accordingly
             if uploaded_file.name.endswith('.xlsx'):
-                input_df = pd.read_excel(uploaded_file)
+                try:
+                    input_df = pd.read_excel(uploaded_file)
+                except Exception as e:
+                    st.error(f"Excel読み込みエラー: {e}")
+                    input_df = None
             else:
                 # CSV logic (with fallback)
                 try:
@@ -473,6 +477,9 @@ else:
                 except UnicodeDecodeError:
                     uploaded_file.seek(0)
                     input_df = pd.read_csv(uploaded_file, encoding='cp932')
+                except Exception as e:
+                     st.error(f"CSV読み込みエラー: {e}")
+                     input_df = None
             
             # Support for Japanese Headers (e.g. from Google Forms)
             
