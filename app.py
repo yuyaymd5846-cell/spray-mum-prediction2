@@ -466,7 +466,24 @@ else:
             # Determine file type and read accordingly
             if uploaded_file.name.lower().endswith('.xlsx'):
                 try:
-                    input_df = pd.read_excel(uploaded_file)
+                    # Determine header row dynamically
+                    # Read first few rows without header
+                    temp_df = pd.read_excel(uploaded_file, header=None, nrows=10)
+                    header_row_idx = 0
+                    
+                    found_header = False
+                    for i, row in temp_df.iterrows():
+                        # Check if row contains key keywords
+                        row_text = " ".join([str(x) for x in row.values])
+                        if "品種" in row_text and ("ハウス" in row_text or "生産者" in row_text):
+                            header_row_idx = i
+                            found_header = True
+                            break
+                    
+                    # Read with correct header
+                    uploaded_file.seek(0)
+                    input_df = pd.read_excel(uploaded_file, header=header_row_idx)
+                    
                 except Exception as e:
                     st.error(f"Excel読み込みエラー: {e}")
                     input_df = None
