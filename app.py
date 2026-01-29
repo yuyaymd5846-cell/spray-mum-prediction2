@@ -190,6 +190,11 @@ def merge_datasets(existing_df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFr
     old_std = standardize_date(existing_df)
     new_std = standardize_date(new_df)
     
+    # Remove duplicates before setting index to avoid "non-unique multi-index" error
+    # We keep the 'last' entry assuming it's the most recent/correct one.
+    old_std = old_std.drop_duplicates(subset=key_cols, keep='last')
+    new_std = new_std.drop_duplicates(subset=key_cols, keep='last')
+
     # Set index
     old_std.set_index(key_cols, inplace=True)
     new_std.set_index(key_cols, inplace=True)
