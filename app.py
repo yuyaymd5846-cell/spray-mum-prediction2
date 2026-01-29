@@ -424,6 +424,7 @@ elif input_method == "Googleスプレッドシート":
                 "ローカル保存データに統合 (Merge)", 
                 key="merge_gs_to_local",
                 on_click=merge_and_switch_callback,
+                args=(input_df,)
             )
             
         # Always allow saving to initialize an empty sheet
