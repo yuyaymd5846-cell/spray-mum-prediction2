@@ -26,7 +26,7 @@ with col_season1:
     coeff_summer = st.number_input("夏 (6-8月)", value=1.4, step=0.1, key="coeff_summer")
 with col_season2:
     coeff_autumn = st.number_input("秋 (9-11月)", value=1.3, step=0.1, key="coeff_autumn")
-    coeff_winter = st.number_input("冬 (12-2月)", value=1.2, step=0.1, key="coeff_winter")
+    coeff_winter = st.number_input("冬 (12-2月)", value=1.1, step=0.1, key="coeff_winter")
 
 seasonal_coeffs = {
     3: coeff_spring, 4: coeff_spring, 5: coeff_spring,
@@ -190,6 +190,11 @@ def merge_datasets(existing_df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFr
     old_std = standardize_date(existing_df)
     new_std = standardize_date(new_df)
     
+    # Remove duplicates before setting index to avoid "non-unique multi-index" error
+    # We keep the 'last' entry assuming it's the most recent/correct one.
+    old_std = old_std.drop_duplicates(subset=key_cols, keep='last')
+    new_std = new_std.drop_duplicates(subset=key_cols, keep='last')
+
     # Set index
     old_std.set_index(key_cols, inplace=True)
     new_std.set_index(key_cols, inplace=True)
@@ -424,6 +429,7 @@ elif input_method == "Googleスプレッドシート":
                 "ローカル保存データに統合 (Merge)", 
                 key="merge_gs_to_local",
                 on_click=merge_and_switch_callback,
+                args=(input_df,)
             )
             
         # Always allow saving to initialize an empty sheet
@@ -700,7 +706,37 @@ if input_df is not None and not input_df.empty:
             st.divider()
 
             st.divider()
-            st.subheader(f"週間集計 ({view_start_date} ~ {view_end_date})")
+            
+            # --- Detail Filtering (New) ---
+            with st.expander("🔍 詳細フィルタ (生産者・品種などで絞り込み)", expanded=False):
+                col_f1, col_f2, col_f3 = st.columns(3)
+                
+                # Dynamic Lists from View DF
+                all_prods = sorted(view_df['producer'].unique().tolist())
+                all_vars = sorted(view_df['variety'].unique().tolist())
+                all_houses = sorted(view_df['house_name'].unique().tolist())
+                
+                with col_f1:
+                    sel_prods = st.multiselect("生産者", all_prods, default=[])
+                with col_f2:
+                    sel_vars = st.multiselect("品種", all_vars, default=[])
+                with col_f3:
+                    sel_houses = st.multiselect("ハウス名", all_houses, default=[])
+                
+                # Apply Filters
+                if sel_prods:
+                    view_df = view_df[view_df['producer'].isin(sel_prods)]
+                if sel_vars:
+                    view_df = view_df[view_df['variety'].isin(sel_vars)]
+                if sel_houses:
+                    view_df = view_df[view_df['house_name'].isin(sel_houses)]
+                
+                st.caption(f"該当件数: {len(view_df)} 行 (出荷予測データ)")
+
+            if view_df.empty:
+                st.warning("条件に一致するデータがありません。フィルタを解除してください。")
+            else:
+                st.subheader(f"週間集計 ({view_start_date} ~ {view_end_date})")
 
             # Aggregation Settings
             agg_options = ["producer", "variety", "color", "shape", "house_name"]
